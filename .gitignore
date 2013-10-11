@@ -1,0 +1,17 @@
+/.nrepl-port
+/.repl
+/checkouts
+/classes
+/data
+/out
+/lib
+/target
+*.class
+*.jar
+.lein-deps-sum
+.lein-failures
+.lein-plugins
+.lein-repl-history
+main.js
+pom.xml
+pom.xml.asc
