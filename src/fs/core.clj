@@ -1,7 +1,7 @@
 (ns fs.core
   (:require [extensions.zip :as azip :refer [postwalk!]]
-            (clojure.zip :as zip :refer [zipper]))
-  (:import [java.nio.file Files LinkOption Path Paths CopyOption]
+            [clojure.zip :as zip :refer [zipper]])
+  (:import [java.nio.file Files LinkOption Path Paths CopyOption StandardCopyOption]
            [java.nio.file.attribute FileAttribute]))
 
 (defn ->path [file]
@@ -64,11 +64,18 @@
                    node)))
              (path-zip (->path path))))
 
-(defn mv [src dst]
-  (try (Files/move (->path src) (->path dst) (into-array CopyOption []))
+(defn mv [src dst & [options]]
+  (try (let [options-array
+             (if options
+               (if (:overwrite? options)
+                 [StandardCopyOption/REPLACE_EXISTING]
+                 [])
+               [])
+             copy-options (into-array CopyOption options-array)]
+         (Files/move (->path src) (->path dst) copy-options))
        (catch Exception ex (println (.getMessage ex)))))
 
-(defn mass-rename [{:keys [root pred transform test?]}]
+(defn mass-rename [{:keys [root pred transform test? overwrite?]}]
   "Renames file-names that satisfy pred by transform, ancestor root"
   (postwalk! (path-zip (->path root))
              (fn [loc]
@@ -81,7 +88,7 @@
                              new-path (.resolve directory (->path new-file-name))]
                          (if test?
                            (println "mv: " node " -> " new-path)
-                           (mv node new-path))))))))))
+                           (mv node new-path {:overwrite? overwrite?}))))))))))
 
 (defn rm [file]
   (let [path (->path file)]
