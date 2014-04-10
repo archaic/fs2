@@ -1,5 +1,5 @@
 (ns fs.core
-  (:require [extensions.zip :as azip :refer [postwalk!]]
+  (:require [extension.zip :as azip :refer [postwalk!]]
             [clojure.zip :as zip :refer [zipper]])
   (:import [java.nio.file Files LinkOption Path Paths CopyOption StandardCopyOption]
            [java.nio.file.attribute FileAttribute]))

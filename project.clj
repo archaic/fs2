@@ -1,6 +1,6 @@
-(defproject fs "0.4.4"
+(defproject fs "0.4.7"
   :description "File System Utilities"
-  :dependencies [[extensions "0.1.5"]
+  :dependencies [[extension "0.2.2"]
                  [clj-time "0.6.0"]
                  [org.apache.commons/commons-vfs2 "2.0"]
-                 [org.clojure/clojure "1.5.1"]])
+                 [org.clojure/clojure "1.6.0"]])
