@@ -4,28 +4,35 @@
   (:import [java.nio.file Files LinkOption Path Paths CopyOption StandardCopyOption]
            [java.nio.file.attribute FileAttribute]))
 
-(defn ->path [file]
+(defn ->path
+  [file]
   (cond (string? file) (Paths/get file (into-array String []))
         (instance? Path file) file))
 
-(defn file? [path]
+(defn file?
+  [path]
   (Files/isRegularFile (->path path) (LinkOption/values)))
 
-(defn directory? [path]
+(defn directory?
+  [path]
   (Files/isDirectory (->path path) (LinkOption/values)))
 
-(defn children [path]
+(defn children
+  [path]
   (iterator-seq (.iterator (Files/newDirectoryStream path))))
 
-(defn path-zip [root]
+(defn path-zip
   "Returns a (non editable) zipper for path elements, given a root element"
+  [root]
   (zipper directory? children nil root))
 
-(defn directories [path]
+(defn directories
+  [path]
   (filter directory? (children path)))
 
-(defn rename [path m]
+(defn rename
   "Renames all regular files in path from keys in m to values"
+  [path m]
   (doseq [[source target] m]
     (try (Files/move (.resolve path source)
                      (.resolve path target) (into-array CopyOption []))
@@ -35,36 +42,42 @@
   ([path] (Files/createDirectory (->path path) (into-array FileAttribute [])))
   ([path dir] (mkdir (.resolve (->path path) dir))))
 
-(defn rmdir [path]
+(defn rmdir
+  [path]
   (let [path (->path path)]
     (when (directory? path)
       (postwalk! (path-zip path)
                  (fn [loc]
                    (Files/delete (zip/node loc)))))))
 
-(defn cp [from to]
+(defn cp
+  [from to]
   (Files/copy (->path from) (->path to) (into-array CopyOption [])))
 
-(defn create [path dirs]
+(defn create
   "Creates directories in path"
+  [path dirs]
   (doseq [dir dirs]
     (mkdir path dir)))
 
-(defn files [path]
+(defn files
   "A sequence of paths within path which are regular files, path must
    be a path to a directory"
+  [path]
   (let [children (children path)]
     (filter file? children)))
 
-(defn mass-files [path]
+(defn mass-files
   "A sequence of paths within path which are regular files, recursive"
+  [path]
   (azip/keep (fn [loc]
                (let [node (zip/node loc)]
                  (when (file? node)
                    node)))
              (path-zip (->path path))))
 
-(defn mv [src dst & [options]]
+(defn mv
+  [src dst & [options]]
   (try (let [options-array
              (if options
                (if (:overwrite? options)
@@ -75,8 +88,9 @@
          (Files/move (->path src) (->path dst) copy-options))
        (catch Exception ex (println (.getMessage ex)))))
 
-(defn mass-rename [{:keys [root pred transform test? overwrite?]}]
+(defn mass-rename
   "Renames file-names that satisfy pred by transform, ancestor root"
+  [{:keys [root pred transform test? overwrite?]}]
   (postwalk! (path-zip (->path root))
              (fn [loc]
                (let [node (zip/node loc)]

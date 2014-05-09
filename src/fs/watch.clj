@@ -1,7 +1,7 @@
 (ns fs.watch
   "A controller to monitor filesystem changes, with appropriate callback hooks"
-  (:require [extensions.zip :refer [prewalk!]]
-            [clj-time.core :as time]
+  (:require [extension.zip :refer [prewalk!]]
+            [clj-time.core :as t]
             [clojure.zip :refer [node]]
             [fs.core :refer [directory? path-zip ->path files]])
   (:import [java.nio.file Path WatchEvent WatchService FileSystems
@@ -106,38 +106,33 @@
       (reset! watching? false)
       (.close watcher))))
 
-(def path-list (atom []))
+(def path-list
+  (atom []))
 
-#_(poll-watch (->path "/tmp/")
-              {:modify (fn [path]
-                         (swap! path-list conj
-                                (str "<MODIFY>" (.toString path) "</MODIFY>")))})
-
-(defn seconds->millis [s]
-  (-> s time/secs .toStandardDuration .getMillis))
+(defn seconds->millis
+  [s]
+  (-> s t/seconds .toStandardDuration .getMillis))
 
 (defonce watching?
   (atom false))
 
-(defn schedule [f s]
+(defn schedule
   "Calls function f every s seconds for side effects"
+  [f s]
   (future
     (while @watching?
       (do (Thread/sleep (seconds->millis s))
           (f)))))
 
-(defn force-watch [path callback s]
+(defn force-watch
   "Sometimes even polling is not enough, for each file directly in path, call
    callback on the file every s seconds"
+  [path callback s]
   (reset! watching? true)
   (schedule (fn []
               (doseq [path (files (->path path))]
                 (callback path)))
             s))
 
-#_(force-watch "/tmp" (fn [path] (println path)) 3)
-
 (defn stop-force-watch []
   (reset! watching? false))
-
-#_(stop-force-watch)
