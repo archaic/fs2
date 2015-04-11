@@ -30,9 +30,9 @@
 
 (defn mkdir
   ([path]
-     (Files/createDirectory path (into-array FileAttribute [])))
+   (Files/createDirectory path (into-array FileAttribute [])))
   ([^Path path ^Path dir]
-     (mkdir (.resolve path dir))))
+   (mkdir (.resolve path dir))))
 
 (defn cp
   [^Path from ^Path to]
