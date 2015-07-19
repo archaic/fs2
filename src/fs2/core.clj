@@ -1,12 +1,15 @@
 (ns fs2.core
   (:require [clojure.zip :as zip])
-  (:import [java.nio.file Files LinkOption Path Paths CopyOption]
+  (:import [java.net URL URI]
+           [java.nio.file Files LinkOption Path Paths CopyOption]
            [java.nio.file.attribute FileAttribute]))
 
 (defn ->path
-  [file]
-  (cond (string? file) (Paths/get file (into-array String []))
-        (instance? Path file) file))
+  [x]
+  (cond (string? x) (Paths/get x (into-array String []))
+        (instance? Path x) x
+        (instance? URI x) (Paths/get x)
+        (instance? URL x) (Paths/get (.toURI ^URL x))))
 
 (defn file?
   [path]
