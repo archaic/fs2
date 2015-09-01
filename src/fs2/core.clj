@@ -32,10 +32,12 @@
   (filter directory? (children path)))
 
 (defn mkdir
-  ([path]
-   (Files/createDirectory path (into-array FileAttribute [])))
-  ([^Path path ^Path dir]
-   (mkdir (.resolve path dir))))
+  [^Path path]
+  (Files/createDirectory path (into-array FileAttribute [])))
+
+(defn mkdirs
+  [^Path path]
+  (Files/createDirectories path (into-array FileAttribute [])))
 
 (defn cp
   [^Path from ^Path to]
