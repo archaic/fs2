@@ -1,8 +1,18 @@
 (ns fs2.core
-  (:require [clojure.zip :as zip])
-  (:import [java.net URL URI]
+  (:require [clojure.java.io :as io]
+            [clojure.zip :as zip])
+  (:import [java.io FileInputStream]
+           [java.net URL URI]
            [java.nio.file Files LinkOption Path Paths CopyOption]
            [java.nio.file.attribute FileAttribute]))
+
+(extend Path
+  io/IOFactory
+  (assoc io/default-streams-impl
+    :make-input-stream
+    (fn [^Path x opts]
+      (io/make-input-stream (FileInputStream. (.toString x))
+                            opts))))
 
 (defn ->path
   [x]
