@@ -66,3 +66,9 @@
   [path]
   (when (file? path)
     (Files/delete path)))
+
+(defn mv
+  [^Path from ^Path to]
+  (Files/move from
+              to
+              #^"[Ljava.nio.file.CopyOption;" (into-array CopyOption [])))
