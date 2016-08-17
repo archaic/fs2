@@ -72,3 +72,16 @@
   (Files/move from
               to
               #^"[Ljava.nio.file.CopyOption;" (into-array CopyOption [])))
+
+(defn create-tmp
+  [prefix]
+  (Files/createTempDirectory prefix
+                             (into-array FileAttribute
+                                         [])))
+
+(defn symlink
+  [path target]
+  (Files/createSymbolicLink path
+                            target
+                            (into-array FileAttribute
+                                        [])))
