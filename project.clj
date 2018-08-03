@@ -1,4 +1,11 @@
-(defproject com.eoneq/fs2 "0.7.1"
+(defproject com.eoneq/fs2 "0.7.2"
+
   :description "File System Utilities"
-  :dependencies [[org.clojure/clojure "1.8.0"]]
-  :global-vars {*warn-on-reflection* true})
+
+  :global-vars {*warn-on-reflection* true}
+
+  :lein-tools-deps/config {:config-files [:install :user :project]}
+
+  :middleware [lein-tools-deps.plugin/resolve-dependencies-with-deps-edn]
+
+  :plugins [[lein-tools-deps "0.4.1"]])
