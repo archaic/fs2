@@ -85,3 +85,7 @@
                             target
                             (into-array FileAttribute
                                         [])))
+
+(defn size-in-bytes
+  [path]
+  (Files/size path))

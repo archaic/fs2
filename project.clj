@@ -1,4 +1,4 @@
-(defproject com.eoneq/fs2 "0.7.2"
+(defproject com.eoneq/fs2 "0.7.3"
 
   :description "File System Utilities"
 
