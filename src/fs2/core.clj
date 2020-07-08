@@ -1,6 +1,7 @@
 (ns fs2.core
   (:require [clojure.java.io :as io]
-            [clojure.zip :as zip])
+            [clojure.zip :as zip]
+            [fs2.core :as fs])
   (:import [java.io FileInputStream]
            [java.net URL URI]
            [java.nio.file Files LinkOption Path Paths CopyOption]
@@ -16,18 +17,24 @@
 
 (defn ->path
   [x]
-  (cond (string? x) (Paths/get x (into-array String []))
-        (instance? Path x) x
+  (cond (instance? Path x) x
+        (and (string? x)
+             (re-find #"(?i)^file:"
+                      x))
+        (->path (URL. x))
+        (string? x) (Paths/get x (into-array String []))
         (instance? URI x) (Paths/get x)
         (instance? URL x) (Paths/get (.toURI ^URL x))))
 
 (defn file?
   [path]
-  (Files/isRegularFile path (LinkOption/values)))
+  (Files/isRegularFile (->path path)
+                       (LinkOption/values)))
 
 (defn directory?
   [path]
-  (Files/isDirectory path (LinkOption/values)))
+  (Files/isDirectory (->path path)
+                     (LinkOption/values)))
 
 (defn children
   [path]
@@ -43,11 +50,13 @@
 
 (defn mkdir
   [^Path path]
-  (Files/createDirectory path (into-array FileAttribute [])))
+  (Files/createDirectory (->path path)
+                         (into-array FileAttribute [])))
 
 (defn mkdirs
   [^Path path]
-  (Files/createDirectories path (into-array FileAttribute [])))
+  (Files/createDirectories (->path path)
+                           (into-array FileAttribute [])))
 
 (defn cp
   [^Path from ^Path to]
@@ -79,13 +88,31 @@
                              (into-array FileAttribute
                                          [])))
 
+(defn symlink?
+  [path]
+  (Files/isSymbolicLink (->path path)))
+
 (defn symlink
-  [path target]
-  (Files/createSymbolicLink path
-                            target
-                            (into-array FileAttribute
-                                        [])))
+  [link target]
+
+  (let [link-path
+        (->path link)
+
+        target-path
+        (->path target)]
+
+    (when (symlink? link-path)
+      (Files/deleteIfExists link-path))
+
+    (Files/createSymbolicLink link-path
+                              target-path
+                              (into-array FileAttribute
+                                          []))))
 
 (defn size-in-bytes
   [path]
   (Files/size path))
+
+(defn to-bytes
+  [path]
+  (Files/readAllBytes (->path path)))
