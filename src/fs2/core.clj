@@ -1,7 +1,6 @@
 (ns fs2.core
   (:require [clojure.java.io :as io]
-            [clojure.zip :as zip]
-            [fs2.core :as fs])
+            [clojure.zip :as zip])
   (:import [java.io FileInputStream]
            [java.net URL URI]
            [java.nio.file Files LinkOption Path Paths CopyOption]
@@ -46,7 +45,8 @@
 
 (defn directories
   [path]
-  (filter directory? (children path)))
+  (filter directory?
+          (children (->path path))))
 
 (defn mkdir
   [^Path path]
@@ -64,12 +64,19 @@
               to
               #^"[Ljava.nio.file.CopyOption;" (into-array CopyOption [])))
 
-(defn files
-  "A sequence of paths within path which are regular files, path must
-  be a path to a directory"
+(defn symlink?
   [path]
-  (let [children (children path)]
-    (filter file? children)))
+  (Files/isSymbolicLink (->path path)))
+
+(defn files
+  [path]
+  (filter file?
+          (children (->path path))))
+
+(defn symlinks
+  [path]
+  (filter symlink?
+          (children (->path path))))
 
 (defn rm
   [path]
@@ -78,8 +85,8 @@
 
 (defn mv
   [^Path from ^Path to]
-  (Files/move from
-              to
+  (Files/move (->path from)
+              (->path to)
               #^"[Ljava.nio.file.CopyOption;" (into-array CopyOption [])))
 
 (defn create-tmp
@@ -87,10 +94,6 @@
   (Files/createTempDirectory prefix
                              (into-array FileAttribute
                                          [])))
-
-(defn symlink?
-  [path]
-  (Files/isSymbolicLink (->path path)))
 
 (defn symlink
   [link target]
